@@ -1,12 +1,14 @@
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
+import Admin from "../models/Admin.js";
+
 
 // User Login
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const user = await User.findOne({ email });
+        const user = await Admin.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
@@ -23,4 +25,4 @@ const loginUser = async (req, res) => {
     }
 };
 
-module.exports = { loginUser };
+export default loginUser

@@ -1,25 +1,34 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const connectDB = require('./src/config/db');
-const authRoutes = require('./src/routes/authRoutes');
+import dotenv from 'dotenv'
+dotenv.config()
+import express from 'express'
+import cors from 'cors'
+import authRoutes from './src/routes/authRoutes.js';
+import connectDB from './src/config/db.js';
+import userRoutes from './src/routes/userRoutes.js';
+import distributionRoutes from './src/routes/distributionRoutes.js';
+
+
+
+
 
 const app = express();
 
 // Enable CORS
 app.use(cors({
-    origin: "http://localhost:3000", // Adjust based on frontend URL
+    origin: "http://localhost:3000", // Match your frontend
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.use(express.json());
 
 // Connect Database
 connectDB();
-
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/distribution', distributionRoutes);
 
 
 const PORT = process.env.PORT || 5000;

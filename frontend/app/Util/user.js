@@ -60,3 +60,21 @@ export const deleteUser = async (email) => {
         throw error.response?.data?.message || "Failed to delete user";
     }
 };
+
+export const uploadfiles = async (data) => {
+    try {
+        const response = await api.post('/users/upload', data, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
+
+        if (response.data) {
+            console.log("File upload success:", response.data);
+            return { success: true, message: response.data.message,data:response.data.data };
+        } else {
+            throw new Error("Invalid response from server");
+        }
+    } catch (error) {
+        console.error("File upload error:", error.response?.data || error.message);
+        return { success: false, message: error.response?.data?.message || "Upload failed" };
+    }
+};
