@@ -44,14 +44,17 @@ export default function UploadContent() {
   const handleFileInput = (e) => handleFiles(e.target.files);
 
   const handleFiles = (files) => {
-    if (files?.[0] && files[0].type === "text/csv") {
-      setFile(files[0]);
-      setUploadStatus(null);
-    } else {
-      setUploadStatus({ type: "error", message: "Please upload a CSV file" });
+    if (files?.[0]) {
+      const file = files[0];
+      const fileType = file.type;
+      if (fileType === "text/csv" || fileType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || fileType === "application/vnd.ms-excel") {
+        setFile(file);
+        setUploadStatus(null);
+      } else {
+        setUploadStatus({ type: "error", message: "Please upload a CSV, XLSX, or XLS file" });
+      }
     }
   };
-
   const handleUpload = async () => {
     if (!file) return;
 
@@ -92,9 +95,9 @@ export default function UploadContent() {
 
     const result = await saveDistributionData(distributed);
     if (result.success) {
-      alert("Data saved successfully!");
+      alert(result.success.message || "Data distributed successfully!");
     } else {
-      alert("Failed to save data!");
+      alert("Failed to Distribute data!");
     }
   };
 

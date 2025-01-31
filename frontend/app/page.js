@@ -1,29 +1,30 @@
 "use client";
-import { useState } from "react";
+import {  useState } from "react";
 import { useRouter } from "next/navigation";
-import ThemeToggle from "@/components/Themtoggle";
+import ThemeToggle from "@/components/common/Themtoggle";
 import { login } from "./Util/auth";
-import api from "./Util/api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; 
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const result = await login(email, password);
-    if (result.success) {
-      router.push("/dashboard");
-    } else {
-      alert("Invalid credentials");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await login(email, password);
+      if (result.success) {
+        router.push("/dashboard");
+        toast.success("Logged in successfully!");
+      } else {
+        toast.error("Invalid credentials!");
+      }
+    } catch (error) {
+      toast.error("An error occurred!");
     }
-  } catch (error) {
-    alert(error);
-  }
-};
-
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4">
@@ -83,7 +84,7 @@ export default function Login() {
               </div>
             </div>
 
-            <button 
+            <button
               type="submit"
               className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg
                        hover:bg-blue-700 
@@ -98,6 +99,7 @@ export default function Login() {
           </form>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} />
     </div>
   );
 }

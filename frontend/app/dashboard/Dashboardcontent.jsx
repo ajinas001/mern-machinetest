@@ -1,6 +1,47 @@
-import React from 'react'
+'use client'
+import React, {useState ,useEffect } from 'react'
+import { fetchUsers } from '../Util/user';
+import { fetch } from '../Util/distribute';
 
 export default function DashboardContent() {
+
+  const [agent, setAgent] = useState([]);
+  const [distributedData, setDistributedData] = useState([]);
+
+  const handlefetch = async () => {
+    try {
+        const result = await fetchUsers();
+        if (result.success) {
+            setAgent(result.data.data);
+        } else {
+            alert("Failed to fetch users");
+        }
+    } catch (error) {
+        alert(error);
+    }
+};
+
+useEffect(() => {
+  handlefetch();
+}, []);
+
+useEffect(() => {
+  const fetchDistributedData = async () => {
+      try {
+          const response = await fetch();
+          console.log(response, "response");
+          const data = response.data.data; 
+          if (data) {
+              setDistributedData(data); 
+          }
+      } catch (err) {
+          console.error("Error fetching distributed data:", err);
+      } 
+  };
+
+  fetchDistributedData();
+}, []);
+
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -13,7 +54,7 @@ export default function DashboardContent() {
               </div>
               <div className="ml-4">
                 <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Agents</h3>
-                <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">10</p>
+                <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{agent.length || 0}</p>
               </div>
             </div>
           </div>
@@ -28,7 +69,7 @@ export default function DashboardContent() {
               </div>
               <div className="ml-4">
                 <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Lists</h3>
-                <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">25</p>
+                <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white"> {distributedData.reduce((acc, curr) => acc + curr.data.length, 0)}</p>
               </div>
             </div>
           </div>
@@ -43,8 +84,8 @@ export default function DashboardContent() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Tasks Completed</h3>
-                <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">15</p>
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Average list distributed per agent</h3>
+                <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{Math.round(distributedData.reduce((acc, curr) => acc + curr.data.length, 0) / distributedData.length) || 0}</p>
               </div>
             </div>
           </div>

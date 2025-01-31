@@ -6,7 +6,7 @@ import authRoutes from './src/routes/authRoutes.js';
 import connectDB from './src/config/db.js';
 import userRoutes from './src/routes/userRoutes.js';
 import distributionRoutes from './src/routes/distributionRoutes.js';
-
+import cookieParser from 'cookie-parser';
 
 
 
@@ -22,7 +22,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
-
+app.use(cookieParser());
 // Connect Database
 connectDB();
 // Routes

@@ -5,29 +5,74 @@ import fs from 'fs';
 import path from 'path';
 import csv from 'csv-parser';
 
-export const uploadFile = (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ success: false, message: 'No file uploaded' });
-    }
 
-    const filePath = path.join(process.cwd(), 'uploads', req.file.filename);
-    const results = [];
+// Function to validate the content of the CSV file
+const validateCSVContent = (data) => {
+    const requiredFields = ["FirstName", "Phone", "Notes"];
+    const errors = [];
 
-    fs.createReadStream(filePath)
-        .pipe(csv()) // Parsing CSV to JSON
-        .on('data', (data) => results.push(data))
-        .on('end', () => {
-            res.json({
-                success: true,
-                message: 'File uploaded and parsed successfully!',
-                data: results, // Sending parsed CSV data
-            });
-        })
-        .on('error', (err) => {
-            res.status(500).json({ success: false, message: 'Error reading CSV file', error: err.message });
+    data.forEach((row, index) => {
+        // Check if all required fields exist
+        requiredFields.forEach((field) => {
+            if (!row[field]) {
+                errors.push(`Missing "${field}" in row ${index + 1}`);
+            }
         });
+
+        // Validate Phone (should be a number)
+        if (row["Phone"] && isNaN(Number(row["Phone"]))) {
+            errors.push(`Invalid "Phone" value in row ${index + 1}: "${row["Phone"]}"`);
+        }
+
+        // Validate FirstName and Notes (should be strings)
+        if (row["FirstName"] && typeof row["FirstName"] !== "string") {
+            errors.push(`Invalid "FirstName" value in row ${index + 1}: "${row["FirstName"]}"`);
+        }
+        if (row["Notes"] && typeof row["Notes"] !== "string") {
+            errors.push(`Invalid "Notes" value in row ${index + 1}: "${row["Notes"]}"`);
+        }
+    });
+
+    return errors;
 };
 
+export const uploadFile = (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
+    const filePath = path.join(process.cwd(), "uploads", req.file.filename);
+
+    const results = [];
+    fs.createReadStream(filePath)
+        .pipe(csv())
+        .on("data", (data) => results.push(data))
+        .on("end", () => {
+            // Validate the content of the CSV
+            const errors = validateCSVContent(results);
+            if (errors.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Validation failed Incorrect Format",
+                    errors,
+                });
+            }
+
+            // Return success if validation passes
+            res.json({
+                success: true,
+                message: "File uploaded and parsed successfully!",
+                data: results,
+            });
+        })
+        .on("error", (err) => {
+            res.status(500).json({
+                success: false,
+                message: "Error reading CSV file",
+                error: err.message,
+            });
+        });
+};
 
 // Fetch Users
 
